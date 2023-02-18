@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 	"os/exec"
 )
@@ -9,11 +10,15 @@ import (
 func main() {
 	command := os.Args[3]
 	args := os.Args[4:len(os.Args)]
-	// fmt.Println(command, args)
 
 	cmd := exec.Command(command, args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+	err := cmd.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+	cmd.Wait()
+	os.Exit(cmd.ProcessState.ExitCode())
 }
