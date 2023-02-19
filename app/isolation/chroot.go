@@ -21,6 +21,7 @@ func CreateRoot() string {
 	commands = append(commands, exec.Command("mkdir", "-p", rootDir))
 	commands = append(commands, buildDirStructure(rootDir)...)
 	commands = append(commands, copyBins(rootDir)...)
+	commands = append(commands, copyFolders(rootDir)...)
 	runCommands(commands)
 
 	return rootDir
@@ -46,6 +47,7 @@ func buildDirStructure(rootDir string) []*exec.Cmd {
 
 var minBins []string = []string{
 	"/usr/local/bin/docker-explorer",
+	"/bin/ps",
 }
 
 func copyBins(rootDir string) []*exec.Cmd {
@@ -60,13 +62,36 @@ func copyBins(rootDir string) []*exec.Cmd {
 	return commands
 }
 
-func runCommands(commands []*exec.Cmd) {
+var foldersToCopy []string = []string{
+	"/lib",
+	"/bin",
+}
+
+func copyFolders(rootDir string) []*exec.Cmd {
+	var commands []*exec.Cmd
+	for _, binName := range foldersToCopy {
+		commands = append(commands,
+			exec.Command(
+				"cp", "-a",
+				binName,
+				fmt.Sprintf("%s%s", rootDir, binName)))
+	}
+	return commands
+}
+
+func runCommands(commands []*exec.Cmd) error {
 	for _, command := range commands {
 		if os.Getenv("DEBUG") != "" {
-			log.Println("Running command: ", command)
+			log.Println("Running command to confgure chroot: ", command)
 			command.Stdout = os.Stdout
 			command.Stderr = os.Stderr
 		}
-		command.Run()
+		err := command.Run()
+		if err != nil {
+			log.Println("Error on command", command)
+			log.Fatal(err)
+			return err
+		}
 	}
+	return nil
 }

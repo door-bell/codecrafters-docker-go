@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"syscall"
 
 	"github.com/door-bell/codecrafters-docker-go/app/isolation"
 )
@@ -14,7 +15,7 @@ func main() {
 	// include the command part with the rest of the arguments.
 	// command := os.Args[3]
 	// args := os.Args[4:len(os.Args)]
-	cmd := buildCommand(os.Args[3:len(os.Args)])
+	cmd := buildRunCommand(os.Args[3:len(os.Args)])
 	err := cmd.Start()
 	if err != nil {
 		log.Fatal(err)
@@ -24,16 +25,20 @@ func main() {
 	os.Exit(cmd.ProcessState.ExitCode())
 }
 
-func buildCommand(commandAndArgs []string) *exec.Cmd {
+func buildRunCommand(commandAndArgs []string) *exec.Cmd {
 	rootName := isolation.CreateRoot()
-	commandAndArgs = append([]string{rootName}, commandAndArgs...)
-	cmd := exec.Command("chroot", commandAndArgs...)
-	wireStdio(cmd)
-	return cmd
-}
-
-func wireStdio(cmd *exec.Cmd) {
+	commandStr := commandAndArgs[0]
+	commandArgs := commandAndArgs[1:]
+	cmd := exec.Command(commandStr, commandArgs...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Chroot:     rootName,
+		Cloneflags: syscall.CLONE_NEWPID,
+	}
+	if os.Getenv("DEBUG") != "" {
+		log.Println("Final command:", cmd.Path, cmd.Args)
+	}
+	return cmd
 }
