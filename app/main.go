@@ -6,16 +6,32 @@ import (
 	"os/exec"
 	"syscall"
 
+	"github.com/door-bell/codecrafters-docker-go/app/helper"
 	"github.com/door-bell/codecrafters-docker-go/app/isolation"
+	"github.com/door-bell/codecrafters-docker-go/app/registry"
 )
 
 // Usage: your_docker.sh run <image> <command> <arg1> <arg2> ...
 func main() {
-	// Since we actulaly wanna run chroot, we
-	// include the command part with the rest of the arguments.
-	// command := os.Args[3]
-	// args := os.Args[4:len(os.Args)]
-	cmd := buildRunCommand(os.Args[3:len(os.Args)])
+	command := os.Args[1]
+	switch command {
+	case "pull":
+		registry.Pull(os.Args[2])
+	case "run":
+		handleRun()
+	default:
+		log.Fatal("Unknown command:", command)
+	}
+}
+
+func handleRun() {
+	// if !registry.ExistsLocally(image) {
+	//		registry.Pull(image)
+	// }
+	// buildRunCommand(image, args)
+
+	image := os.Args[3]
+	cmd := buildRunCommand(image, os.Args[3:])
 	err := cmd.Start()
 	if err != nil {
 		log.Fatal(err)
@@ -25,11 +41,11 @@ func main() {
 	os.Exit(cmd.ProcessState.ExitCode())
 }
 
-func buildRunCommand(commandAndArgs []string) *exec.Cmd {
-	rootName := isolation.CreateRoot()
-	commandStr := commandAndArgs[0]
+func buildRunCommand(image string, commandAndArgs []string) *exec.Cmd {
+	rootName := isolation.CreateRoot(image)
+	commandName := commandAndArgs[0]
 	commandArgs := commandAndArgs[1:]
-	cmd := exec.Command(commandStr, commandArgs...)
+	cmd := exec.Command(commandName, commandArgs...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -37,8 +53,6 @@ func buildRunCommand(commandAndArgs []string) *exec.Cmd {
 		Chroot:     rootName,
 		Cloneflags: syscall.CLONE_NEWPID,
 	}
-	if os.Getenv("DEBUG") != "" {
-		log.Println("Final command:", cmd.Path, cmd.Args)
-	}
+	helper.DebugLog("Final command:", cmd.Path, cmd.Args)
 	return cmd
 }
