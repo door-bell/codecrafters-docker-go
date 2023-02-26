@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -16,6 +17,7 @@ func Pull(image string) error {
 	// 4. Fetch manifest
 	// 5. Pull image layers and cache them to be used in a container
 	split := strings.Split(image, ":")
+	fmt.Println("image", image)
 	imgName := split[0]
 	imgReference := split[1]
 
