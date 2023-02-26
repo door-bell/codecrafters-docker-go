@@ -1,27 +1,24 @@
 package registry
 
 import (
-	"fmt"
 	"log"
-	"strings"
 
 	"github.com/door-bell/codecrafters-docker-go/app/helper"
 )
 
 // Pull fetches an image from registry.hub.docker.com
 // and caches it locally.
-func Pull(image string) error {
+func Pull(imageStr string) error {
 	// 1. Get token to pull given image
 	// 2. Get manifest list
 	// 3. Search manifest list for given os / architecture
 	// 4. Fetch manifest
 	// 5. Pull image layers and cache them to be used in a container
-	split := strings.Split(image, ":")
-	fmt.Println("image", image)
-	imgName := split[0]
-	imgReference := split[1]
+	image := NewImage(imageStr)
+	imgName := image.name
+	imgReference := image.reference
 
-	token, err := getDockerHubToken(image)
+	token, err := getDockerHubToken(imgName)
 	if err != nil {
 		log.Println("Error fetching docker hub token!")
 		log.Fatal(err)
