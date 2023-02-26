@@ -20,7 +20,7 @@ var client = &http.Client{}
 // Downloads a compressed layer to the correct cache folder
 func downloadLayer(imgName, imgReference, digest, token string) error {
 	dirname := fmt.Sprintf("%s/%s/%s", LOCAL_IMAGE_REPO, imgName, imgReference)
-	filename := fmt.Sprintf("%s/%s", dirname, digest)
+	filename := getLayerFilename(imgName, imgReference, digest)
 	err := os.MkdirAll(dirname, os.ModePerm)
 	if err != nil {
 		return err
@@ -31,9 +31,9 @@ func downloadLayer(imgName, imgReference, digest, token string) error {
 	}
 
 	req, _ := http.NewRequest("GET", getLayerUrl(imgName, digest), nil)
-	req.Header.Add("Authorization", "Bearer "+token)
 	req.Header.Add("Accept", "application/vnd.oci.image.layer.v1.tar+gzip")
 	req.Header.Add("Accept-Encoding", "gzip")
+	req.Header.Add("Authorization", "Bearer "+token)
 	resp, err := client.Do(req)
 	if err != nil {
 		return err

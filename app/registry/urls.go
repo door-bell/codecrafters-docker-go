@@ -22,3 +22,12 @@ func getManifestUrl(name string, reference string) string {
 func getLayerUrl(image, digest string) string {
 	return fmt.Sprintf("https://%s/v2/library/%s/blobs/%s", REGISTRY_URL, image, digest)
 }
+
+func getLayerFilename(image, reference, digest string) string {
+	return fmt.Sprintf("%s/%s/%s/%s.tar.gz",
+		LOCAL_IMAGE_REPO,
+		image,
+		reference,
+		digest,
+	)
+}

@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"syscall"
 
 	"github.com/door-bell/codecrafters-docker-go/app/helper"
@@ -26,12 +27,13 @@ func main() {
 
 func handleRun() {
 	// if !registry.ExistsLocally(image) {
-	//		registry.Pull(image)
+	// 	registry.Pull(image)
 	// }
 	// buildRunCommand(image, args)
-
-	image := os.Args[3]
-	cmd := buildRunCommand(image, os.Args[3:])
+	image := os.Args[2]
+	command := os.Args[3]
+	registry.Pull(image)
+	cmd := buildRunCommand(image, command, os.Args[3:])
 	err := cmd.Start()
 	if err != nil {
 		log.Fatal(err)
@@ -41,8 +43,12 @@ func handleRun() {
 	os.Exit(cmd.ProcessState.ExitCode())
 }
 
-func buildRunCommand(image string, commandAndArgs []string) *exec.Cmd {
-	rootName := isolation.CreateRoot(image)
+func buildRunCommand(image, command string, commandAndArgs []string) *exec.Cmd {
+	split := strings.Split(image, ":")
+	imgName := split[0]
+	imgReference := split[1]
+
+	rootName := isolation.CreateRoot(imgName, imgReference)
 	commandName := commandAndArgs[0]
 	commandArgs := commandAndArgs[1:]
 	cmd := exec.Command(commandName, commandArgs...)

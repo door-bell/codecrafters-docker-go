@@ -7,12 +7,13 @@ import (
 	"os/exec"
 
 	"github.com/door-bell/codecrafters-docker-go/app/helper"
+	"github.com/door-bell/codecrafters-docker-go/app/registry"
 	"github.com/google/uuid"
 )
 
 // CreateRoot returns the name of a temporary
 // folder prepared for chroot
-func CreateRoot(image string) string {
+func CreateRoot(image, reference string) string {
 	// Steps in creating valid chroot:
 	// 1. Create Directory
 	// 2. Copy any necessary binaries
@@ -21,14 +22,15 @@ func CreateRoot(image string) string {
 	commands := []*exec.Cmd{}
 	commands = append(commands, exec.Command("mkdir", "-p", rootDir))
 	commands = append(commands, copyDockerExplorer(rootDir)...)
-	commands = append(commands, copyImageContents(image, rootDir)...)
+	commands = append(commands, copyImageContents(image, reference, rootDir)...)
 	runCommands(commands)
 	return rootDir
 }
 
-func copyImageContents(image string, rootDir string) []*exec.Cmd {
+func copyImageContents(image, reference, rootDir string) []*exec.Cmd {
 	// Commands to copy image contents
-	return []*exec.Cmd{}
+	cmd := exec.Command("cp", "-a", registry.GetImageFsDir(image, reference)+"/.", rootDir)
+	return []*exec.Cmd{cmd}
 }
 
 func copyDockerExplorer(rootDir string) []*exec.Cmd {

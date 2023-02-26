@@ -30,6 +30,7 @@ func Pull(image string) error {
 		log.Println("Error fetching image manifest!")
 		log.Fatal(err)
 	}
+
 	for _, layer := range manifest.Layers {
 		helper.DebugLog("Pulling layer: ", layer.Digest)
 		err = downloadLayer(imgName, imgReference, layer.Digest, token)
@@ -37,6 +38,12 @@ func Pull(image string) error {
 			log.Println("Error downloading layer!")
 			log.Fatal(err)
 		}
+		err = extractLayer(imgName, imgReference, layer.Digest)
+		if err != nil {
+			log.Println("Error extracting layer!")
+			log.Fatal(err)
+		}
 	}
+
 	return nil
 }
