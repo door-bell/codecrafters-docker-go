@@ -6,6 +6,7 @@ type AuthResponse struct {
 	IssuedAt  string `json:"issued_at"`
 }
 
+// ManifestIndex could be v1 or v2
 type ManifestIndex struct {
 	Manifests []ImageManifestRef `json:"manifests"`
 	FsLayers  []FsLayer          `json:"fsLayers"`

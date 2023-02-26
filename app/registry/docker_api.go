@@ -92,7 +92,7 @@ func getImageManifestFromRef(imgName, token string, manifestRef *ImageManifestRe
 }
 
 func fetchManifestIndex(imgName, imgReference, token string) (*ManifestIndex, error) {
-	responseBody, err := responseBytes("GET", getManifestUrl(imgName, imgReference), "index", token)
+	responseBody, err := responseBytes("GET", getManifestUrl(imgName, imgReference), "manifest", token)
 	if err != nil {
 		return nil, err
 	}
@@ -123,8 +123,6 @@ func responseBytes(verb, url, contentType, token string) ([]byte, error) {
 	req, _ := http.NewRequest(verb, url, nil)
 	acceptType := "*/*"
 	switch contentType {
-	case "index":
-		acceptType = "application/vnd.oci.image.index.v1+json"
 	case "manifest":
 		acceptType = "application/vnd.oci.image.manifest.v1+json,application/vnd.oci.image.index.v1+json"
 	case "json":
