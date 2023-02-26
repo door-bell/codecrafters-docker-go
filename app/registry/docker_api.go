@@ -54,13 +54,23 @@ func fetchManifest(imgName, imgReference, token string) (*ImageManifest, error) 
 	if err != nil {
 		return nil, err
 	}
+	// If we got an actual manifest index, find the one for our OS
 	thisPlatform := ImagePlatform{runtime.GOARCH, runtime.GOOS}
 	for _, manifestRef := range index.Manifests {
 		if manifestRef.Platform == thisPlatform {
 			return getImageManifestFromRef(imgName, token, &manifestRef)
 		}
 	}
-	return nil, errors.New("no image manifest found for the current platform")
+	// If we got a v1 response, translate FsLayers into
+	// ImageLayers
+	layers := []ImageLayer{}
+	for _, fsLayer := range index.FsLayers {
+		layers = append(layers, ImageLayer{fsLayer.BlobSum})
+	}
+	if len(layers) > 0 {
+		return &ImageManifest{layers}, nil
+	}
+	return nil, errors.New("unknown manifest type")
 }
 
 func getImageManifestFromRef(imgName, token string, manifestRef *ImageManifestRef) (*ImageManifest, error) {
@@ -116,7 +126,7 @@ func responseBytes(verb, url, contentType, token string) ([]byte, error) {
 	case "index":
 		acceptType = "application/vnd.oci.image.index.v1+json"
 	case "manifest":
-		acceptType = "application/vnd.oci.image.manifest.v1+json"
+		acceptType = "application/vnd.oci.image.manifest.v1+json,application/vnd.oci.image.index.v1+json"
 	case "json":
 		acceptType = "application/json"
 	}

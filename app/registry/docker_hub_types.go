@@ -8,6 +8,7 @@ type AuthResponse struct {
 
 type ManifestIndex struct {
 	Manifests []ImageManifestRef `json:"manifests"`
+	FsLayers  []FsLayer          `json:"fsLayers"`
 }
 
 type ImageManifestRef struct {
@@ -22,6 +23,10 @@ type ImageManifest struct {
 
 type ImageLayer struct {
 	Digest string `json:"digest"`
+}
+
+type FsLayer struct {
+	BlobSum string `json:"blobSum"`
 }
 
 type ImagePlatform struct {

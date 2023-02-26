@@ -3,8 +3,8 @@ package registry
 import "strings"
 
 type Image struct {
-	name      string
-	reference string
+	Name      string
+	Reference string
 }
 
 func NewImage(s string) Image {

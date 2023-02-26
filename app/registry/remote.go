@@ -15,8 +15,8 @@ func Pull(imageStr string) error {
 	// 4. Fetch manifest
 	// 5. Pull image layers and cache them to be used in a container
 	image := NewImage(imageStr)
-	imgName := image.name
-	imgReference := image.reference
+	imgName := image.Name
+	imgReference := image.Reference
 
 	token, err := getDockerHubToken(imgName)
 	if err != nil {

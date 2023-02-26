@@ -14,10 +14,6 @@ import (
 // CreateRoot returns the name of a temporary
 // folder prepared for chroot
 func CreateRoot(image, reference string) string {
-	// Steps in creating valid chroot:
-	// 1. Create Directory
-	// 2. Copy any necessary binaries
-	// 3. Copy any necessary dependencies (none in our case)
 	rootDir := "mydocker-" + uuid.NewString()
 	commands := []*exec.Cmd{}
 	commands = append(commands, exec.Command("mkdir", "-p", rootDir))
